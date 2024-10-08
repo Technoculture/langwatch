@@ -1,0 +1,3 @@
+extraEnvs:
+ - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+   value: Pafdgfhjag434234%7987fdafa

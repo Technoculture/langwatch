@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langwatch-nlp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langwatch-nlp
+  template:
+    metadata:
+      labels:
+        app: langwatch-nlp
+    spec:
+      imagePullSecrets:
+      - name: regcred2
+      containers:
+      - name: langwatch-nlp
+        image: registry.myella.app/langwatch_nlp:1
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        envFrom:
+        - configMapRef:
+            name: langwatch-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langwatch-nlp
+spec:
+  selector:
+    app: langwatch-nlp
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8080

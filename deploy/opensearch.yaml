@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opensearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opensearch
+  template:
+    metadata:
+      labels:
+        app: opensearch
+    spec:
+      containers:
+      - name: opensearch
+        image: opensearchproject/opensearch:2.16.0
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+          limits:
+            cpu: 1
+            memory: 4Gi
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: DISABLE_SECURITY_PLUGIN
+          value: "true"
+        - name: OPENSEARCH_JAVA_OPTS
+          value: "-Xms2048m -Xmx2048m"
+        - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+          value: "Pafdgfhjag434234%7987fdafa"
+        volumeMounts:
+        - name: opensearch-storage
+          mountPath: /usr/share/opensearch/data
+      volumes:
+      - name: opensearch-storage
+        # persistentVolumeClaim:
+        #   claimName: opensearch-pv-claim
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opensearch
+spec:
+  selector:
+    app: opensearch
+  ports:
+    - protocol: TCP
+      port: 9200
+      targetPort: 9200
+      name: opensearch
+    - protocol: TCP
+      port: 9300
+      targetPort: 9300
+      name: opensearch2
+
+# connection url to this opensearch instance from other containers in the cluster
+# http://opensearch:9200
+# create a persistent volume for opensearch data
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: opensearch-pv-claim
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   volumeMode: Filesystem
+#   resources:
+#     requests:
+#       storage: 20Gi
+#   storageClassName: hcloud-volumes

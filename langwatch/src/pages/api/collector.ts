@@ -68,18 +68,6 @@ export default async function handler(
     return res.status(401).json({ message: "Invalid auth token." });
   }
 
-  const currentMonthMessagesCount = await getCurrentMonthMessagesCount([
-    project.id,
-  ]);
-  const activePlan = await dependencies.subscriptionHandler.getActivePlan(
-    project.team.organizationId
-  );
-  if (currentMonthMessagesCount >= activePlan.maxMessagesPerMonth) {
-    return res.status(429).json({
-      message: `ERR_PLAN_LIMIT: You have reached the monthly limit of ${activePlan.maxMessagesPerMonth} messages, please go to LangWatch dashboard to verify your plan.`,
-    });
-  }
-
   // We migrated those keys to inside metadata, but we still want to support them for retrocompatibility for a while
   if (!("metadata" in req.body) || !req.body.metadata) {
     req.body.metadata = {};

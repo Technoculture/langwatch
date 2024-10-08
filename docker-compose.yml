@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BASE_HOST=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:3000
+      - DEBUG=langwatch:*
+      - DATABASE_URL=postgresql://prisma:prisma@postgres:5432/mydb?schema=mydb
+      - ELASTICSEARCH_NODE_URL=http://opensearch:9200
+      - IS_OPENSEARCH=true
+      - REDIS_URL=redis://redis:6379
+      - LANGWATCH_NLP_SERVICE=http://langwatch_nlp:8080
+      - LANGEVALS_ENDPOINT=http://langevals:8000
+    env_file:
+      - langwatch/.env
+    depends_on:
+      - postgres
+      - opensearch
+      - langwatch_nlp
+      - langevals
+
+  langwatch_nlp:
+    build:
+      context: ./langwatch_nlp
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - langwatch/.env
+
+  langevals:
+    image: langwatch/langevals:latest
+    ports:
+      - "8000:8000"
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  opensearch:
+    image: opensearchproject/opensearch:2.16.0
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms2048m -Xmx2048m"
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
+
+volumes:
+  postgres-data:
+  opensearch-data:

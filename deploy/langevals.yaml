@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langevals
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langevals
+  template:
+    metadata:
+      labels:
+        app: langevals
+    spec:
+      containers:
+      - name: langevals
+        image: langwatch/langevals:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 2
+            memory: 2048Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langevals
+spec:
+  selector:
+    app: langevals
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

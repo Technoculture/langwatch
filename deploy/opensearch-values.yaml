@@ -1,0 +1,22 @@
+singleNode: true
+persistence:
+  enabled: true
+  storageClass: "hcloud-volumes" # Replace with your storage class
+  size: 20Gi
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "1"
+    memory: "4Gi"
+opensearchJavaOpts: "-Xmx2g -Xms2g"
+config:
+  opensearch.yml: |
+    discovery.type: single-node
+
+  securityConfig:
+    enabled: false
+
+  service:
+    type: ClusterIP

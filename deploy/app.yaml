@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: langwatch-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: langwatch-app
+  template:
+    metadata:
+      labels:
+        app: langwatch-app
+    spec:
+      imagePullSecrets:
+      - name: regcred2
+      containers:
+        - name: langwatch-app
+          image: registry.myella.app/langwatch:1
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 512m
+              memory: 512Mi
+            limits:
+              cpu: 2
+              memory: 2048Mi
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: BASE_HOST
+              value: "https://langwatch.myella.app"
+            - name: NEXTAUTH_URL
+              value: "https://langwatch.myella.app"
+            - name: DEBUG
+              value: "*"
+            - name: DATABASE_URL
+              value: "postgresql://prisma:prisma@postgres:5432/mydb?schema=mydb"
+            - name: ELASTICSEARCH_NODE_URL
+              value: "http://opensearch:9200"
+            - name: IS_OPENSEARCH
+              value: "true"
+            - name: REDIS_URL
+              value: "http://redis-service:6379"
+            - name: LANGWATCH_NLP_SERVICE
+              value: "http://langwatch-nlp:8082"
+            - name: LANGEVALS_ENDPOINT
+              value: "http://langevals:8000"
+          envFrom:
+            - configMapRef:
+                name: langwatch-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: langwatch-app
+spec:
+  selector:
+    app: langwatch-app
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

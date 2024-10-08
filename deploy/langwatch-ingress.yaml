@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: langwatch-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"   
+spec:
+  tls:
+  - hosts:
+    - langwatch.myella.app
+    secretName: langwatch-production-tls
+  rules:
+  - host: langwatch.myella.app
+    http:
+      paths:
+        - pathType: Prefix
+          path: /
+          backend:
+            service:
+              name: langwatch-app
+              port:
+                number: 3000
+  ingressClassName: nginx
